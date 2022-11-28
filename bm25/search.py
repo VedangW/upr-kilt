@@ -4,7 +4,7 @@ import argparse
 from tqdm import tqdm
 
 from pyserini.search import SimpleSearcher
-from upr_kilt.bm25.utils import read_json, write_json
+from utils import read_json, write_json
 
 def retrieve(queries, num_candidates, searcher, pid2title, verbose):
 

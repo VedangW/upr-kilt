@@ -29,3 +29,18 @@ class TsvSerializer(Serializer):
             'end_span': end_span, 
             'contents': f'{title} {text}'
         }
+
+
+class UprSerializer(Serializer):
+    def __init__(self):
+        super().__init__()
+
+    def serialize(self, split):
+        pid = split[0].strip()
+        text = omit_ends(split[1].strip(), '"')  # Stripping unnec. quotes
+        title = omit_ends(split[2].strip(), '"')
+        self.pid2title[pid] = title  # Must store title to extract text after search
+        return { 
+            'id': pid,
+            'contents': f'{title} {text}'
+        }

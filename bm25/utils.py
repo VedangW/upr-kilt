@@ -1,14 +1,19 @@
+import os
 import json
+import shutil
 import pathlib
 
 
-def read_tsv(path, has_header=True):
+def read_tsv(path, serialize_fn=lambda x: x, has_header=True):
+    """ 
+    Read TSV file and use a function to map to each row.
+    """
+
     with open(path, 'r') as f:
         lines = f.readlines()
-        lines = [[x.strip() for x in row.split('\t')] for row in lines]
-
-    if has_header:
-        lines.pop(0)
+        if has_header:
+            lines.pop(0)
+        lines = [serialize_fn(row.strip().split('\t')) for row in lines]
 
     return lines
 
@@ -32,7 +37,7 @@ def write_json(path, data):
     """ Writes dict or list to JSON file. """
 
     with open(path, 'w') as f:
-        json.dump(data)
+        json.dump(data, f)
 
 
 def read_config(path):
@@ -48,7 +53,7 @@ def read_config(path):
     return cfg
 
 
-def init_file_structure(cfg):
+def init_file_structure(cfg, clear=True):
     """
     Initializes the file structure required for the
     BM25 index to be created.
@@ -56,6 +61,12 @@ def init_file_structure(cfg):
 
     if not cfg['base_dir'].is_dir():
         raise ValueError(f"base_dir: '{cfg['base_dir']} is not a directory.")
+
+    if clear:
+        del_path = lambda p: shutil.rmtree(p) if p.exists() else None
+        del_path(cfg['index_dir'])
+        del_path(cfg['collection_dir'])
+        del_path(cfg['title_path'])
 
     if not cfg['index_dir'].is_dir():
         cfg['index_dir'].mkdir()
