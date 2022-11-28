@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+bm25/config.json
