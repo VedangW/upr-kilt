@@ -1,12 +1,13 @@
 import os
 import math
+import pathlib
 import argparse
 
 from tqdm import tqdm
 
 from jnius import autoclass
 from upr_kilt.bm25.utils import read_config, init_file_structure, \
-                  write_json, read_tsv
+                  write_json, read_tsv, check_file_structure
 from upr_kilt.bm25.serializers import TsvSerializer
 
 
@@ -22,9 +23,15 @@ def read_passages(cfg):
 
 
 def build_index(cfg, args):
-    # TODO: Implement sub-functions
+    """
+    Builds index using Pyserini.
+    """
 
     init_file_structure(cfg)
+    is_correct, index_created = check_file_structure(cfg)
+
+    assert is_correct, "F.S. not created correctly!"
+    assert not index_created, "Index should be empty!"
 
     documents, pid2title = read_passages(cfg, args)
 
@@ -54,15 +61,17 @@ def build_index(cfg, args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_path', type=str,
+    parser.add_argument('--config_path', type=pathlib.Path,
                         required=True, help='Path to config file.')
+    parser.add_argument('--passages', type=pathlib.Path,
+                        required=True, help='Path to passages file.')
     parser.add_argument('--n_threads', type=int, default=1,
                         help='No. of threads for indexing.')
     args = parser.parse_args()
     cfg = read_config(args.config_path)
 
     build_index(cfg, args)
-        
+
     
 if __name__ == '__main__':
     main()

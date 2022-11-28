@@ -44,12 +44,12 @@ def retrieve(queries, num_candidates, searcher, pid2title, verbose):
     return results
 
 
-
 def read_queries(query_file, trunc=None):
     queries = read_json(query_file)
     if trunc:
         queries = queries[:trunc]
     return queries
+
 
 def answer_queries(args):
     cfg = read_json(args.config_path)
