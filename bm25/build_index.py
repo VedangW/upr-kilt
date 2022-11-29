@@ -2,6 +2,7 @@ import os
 import math
 import pathlib
 import argparse
+import subprocess
 
 from tqdm import tqdm
 
@@ -47,21 +48,31 @@ def build_index(args):
         write_json(outpath, shard)
     write_json(cfg['title_path'], pid2title)
 
+
+    program = ['python', '-m', 'pyserini.index.lucene']
+
     # Create index
     args_external = [
-        '-collection', 'JsonCollection',
-        '-generator', 'DefaultLuceneDocumentGenerator',
-        '-threads', str(args.n_threads),
-        '-input', str(cfg['collection_dir']),
-        '-index', str(cfg['index_dir']),
-        '-storePositions',
-        '-storeRaw'
+        '--collection', 'JsonCollection',
+        '--generator', 'DefaultLuceneDocumentGenerator',
+        '--threads', str(args.n_threads),
+        '--input', str(cfg['collection_dir']),
+        '--index', str(cfg['index_dir']),
+        '--storePositions',
+        '--storeRaw'
     ]
 
-    print(args_external)
+    process = subprocess.Popen(
+        program + args_external, 
+        stdout=subprocess.PIPE
+    )
 
-    JIndexCollection = autoclass('io.anserini.index.IndexCollection')
-    JIndexCollection.main(args_external)
+    output, error = process.communicate()
+    
+    if error:
+        print(f"Error: {error}")
+    
+    print(output.decode("utf-8"))
 
 
 def main():
