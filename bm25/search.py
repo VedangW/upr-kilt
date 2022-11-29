@@ -3,10 +3,10 @@ import argparse
 
 from tqdm import tqdm
 
-from pyserini.search import SimpleSearcher
-from utils import read_json, write_json
+from pyserini.search.lucene import LuceneSearcher
+from utils import read_json, write_json, read_config
 
-def retrieve(queries, num_candidates, searcher, pid2title, verbose):
+def retrieve(queries, num_candidates, searcher, pid2title):
 
     def get_text(hit, title):
         text = json.loads(hit.raw)['contents'][len(title):].strip()
@@ -14,7 +14,7 @@ def retrieve(queries, num_candidates, searcher, pid2title, verbose):
 
     results = []
     for query in tqdm(queries):
-        query_id = query['id']
+        query_id = 1
         question = query['question']
         answers = query['answers']
 
@@ -24,10 +24,10 @@ def retrieve(queries, num_candidates, searcher, pid2title, verbose):
         candidates = [
             {
                 'id': hit.docid, 
-                'wikipedia_id': json.loads(hit.raw)['wikipedia_id'], 
-                'paragraph_id': json.loads(hit.raw)['passage_id'], 
-                'start_span': json.loads(hit.raw)['start_span'], 
-                'end_span': json.loads(hit.raw)['end_span'],
+                # 'wikipedia_id': json.loads(hit.raw)['wikipedia_id'], 
+                # 'paragraph_id': json.loads(hit.raw)['passage_id'], 
+                # 'start_span': json.loads(hit.raw)['start_span'], 
+                # 'end_span': json.loads(hit.raw)['end_span'],
                 'title': title,
                 'text': get_text(hit, title), 
                 'score': hit.score 
@@ -52,17 +52,17 @@ def read_queries(query_file, trunc=None):
 
 
 def answer_queries(args):
-    cfg = read_json(args.config_path)
+    cfg = read_config(args.config_path)
     queries = read_queries(args.query_file, trunc=args.trunc)
-    pid2title = read_json(cfg['pid2title'])
-    searcher = SimpleSearcher(cfg['index_dir'])
+    pid2title = read_json(cfg['title_path'])
+    searcher = LuceneSearcher(str(cfg['index_dir']))
 
     results = retrieve(queries, 
                        args.num_cands,
                        searcher, 
                        pid2title)
 
-    write_json(results, args.out_file)
+    write_json(args.out_file, results)
 
 
 def main():
