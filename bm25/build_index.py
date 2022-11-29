@@ -58,8 +58,6 @@ def build_index(args):
         '-storeRaw'
     ]
 
-    print(args_external)
-
     JIndexCollection = autoclass('io.anserini.index.IndexCollection')
     JIndexCollection.main(args_external)
 
