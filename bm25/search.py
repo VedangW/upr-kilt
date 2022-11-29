@@ -30,15 +30,16 @@ def retrieve(queries, num_candidates, searcher, pid2title):
                 # 'end_span': json.loads(hit.raw)['end_span'],
                 'title': title,
                 'text': get_text(hit, title), 
-                'score': hit.score 
-            } 
+                'score': hit.score,
+                'has_answer': "false"
+            }
         for hit, title in zip(hits, titles)]
 
         results.append({
-            'id': query_id,
-            'question': question, 
+            'qid': query_id,
+            'question': question,
             'answers': answers,
-            'candidates': candidates
+            'ctxs': candidates
         })
 
     return results
