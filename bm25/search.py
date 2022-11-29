@@ -82,3 +82,6 @@ def main():
     args.trunc = args.trunc if args.trunc > 0 else None
 
     answer_queries(args)
+
+if __name__ == '__main__':
+    main()
