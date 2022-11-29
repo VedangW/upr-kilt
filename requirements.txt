@@ -1,0 +1,8 @@
+datasets
+matplotlib
+numpy
+pyserini
+sacrebleu
+spacy
+torch>=1.2
+transformers>=4.0
