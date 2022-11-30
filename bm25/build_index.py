@@ -33,6 +33,8 @@ def build_index(args):
     init_file_structure(cfg, clear=args.clear_fs)
     is_correct, index_created = check_file_structure(cfg)
 
+    # base_dir -> index, collection_passages
+
     assert is_correct, "F.S. not created correctly!"
     assert not index_created, "Index should be empty!"
 
