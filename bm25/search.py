@@ -14,7 +14,7 @@ def retrieve(queries, num_candidates, searcher, pid2title):
 
     results = []
     for query in tqdm(queries):
-        query_id = 1
+        query_id = query['id']
         question = query['question']
         answers = query['answers']
 
