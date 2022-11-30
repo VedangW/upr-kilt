@@ -24,12 +24,6 @@ urls = [
     "http://dl.fbaipublicfiles.com/KILT/eli5-train-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/eli5-dev-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/eli5-test_without_answers-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/trex-train-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/trex-dev-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/trex-test_without_answers-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/structured_zeroshot-train-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/structured_zeroshot-dev-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/structured_zeroshot-test_without_answers-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/aidayago2-train-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/aidayago2-dev-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/aidayago2-test_without_answers-kilt.jsonl",
@@ -37,9 +31,6 @@ urls = [
     "http://dl.fbaipublicfiles.com/KILT/wned-test_without_answers-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/cweb-dev-kilt.jsonl",
     "http://dl.fbaipublicfiles.com/KILT/cweb-test_without_answers-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/wow-train-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/wow-dev-kilt.jsonl",
-    "http://dl.fbaipublicfiles.com/KILT/wow-test_without_answers-kilt.jsonl",
 ]
 
 parser = argparse.ArgumentParser()

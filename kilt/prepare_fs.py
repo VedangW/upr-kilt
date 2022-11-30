@@ -23,6 +23,6 @@ def init_dir(path, args):
     else:
         raise ValueError(f"path: {path} already exists.")
 
-init_dir(datasets)
-init_dir(trivia_path)
-init_dir(cache)
+init_dir(datasets, args)
+init_dir(trivia_path, args)
+init_dir(cache, args)
