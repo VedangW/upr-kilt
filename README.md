@@ -33,9 +33,15 @@ python setup.py install
 cd ../upr-kilt
 ```
 
-#### Install KILT datasets
+#### Download KILT datasets
 
 ```{bash}
+export BASE_DIR=... # Add base dir here
+
 # Change BASE_DIR in kilt_setup.sh
 bash scripts/kilt_setup.sh
+
+# Download knowledge source
+mkdir ${BASE_DIR}/knowledge_base
+wget http://dl.fbaipublicfiles.com/KILT/kilt_knowledgesource.json -o ${BASE_DIR}/knowledge_base/kilt_knowledgesource.json
 ```
