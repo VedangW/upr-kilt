@@ -24,7 +24,7 @@ class TsvSerializer(Serializer):
         return { 
             'id': pid, 
             'wikipedia_id': wiki_id, 
-            'passage_id': passage_id, 
+            'paragraph_id': passage_id, 
             'start_span': start_span, 
             'end_span': end_span, 
             'contents': f'{title} {text}'

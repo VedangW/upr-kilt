@@ -24,10 +24,10 @@ def retrieve(queries, num_candidates, searcher, pid2title):
         candidates = [
             {
                 'id': hit.docid, 
-                # 'wikipedia_id': json.loads(hit.raw)['wikipedia_id'], 
-                # 'paragraph_id': json.loads(hit.raw)['passage_id'], 
-                # 'start_span': json.loads(hit.raw)['start_span'], 
-                # 'end_span': json.loads(hit.raw)['end_span'],
+                'wikipedia_id': json.loads(hit.raw)['wikipedia_id'], 
+                'paragraph_id': json.loads(hit.raw)['passage_id'], 
+                'start_span': json.loads(hit.raw)['start_span'], 
+                'end_span': json.loads(hit.raw)['end_span'],
                 'title': title,
                 'text': get_text(hit, title), 
                 'score': hit.score,

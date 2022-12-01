@@ -15,7 +15,7 @@ from serializers import UprSerializer
 def read_passages(args):
     # TODO: Change paths
 
-    serializer = UprSerializer()
+    serializer = TsvSerializer()
     documents = read_tsv(args.passages,
                          serialize_fn=serializer.serialize,
                          has_header=True)
