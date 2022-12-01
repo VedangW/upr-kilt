@@ -36,7 +36,7 @@ def main():
     if not args.in_file.exists():
         raise ValueError(f"Input file `{args.in_file}` doesn't exist!")
     
-    if args.out_file.exists():
+    if args.out_file.exists() and args.verbose:
         print(f"Out file `{args.out_file}` already exists. Overwriting.")
 
     final_obj = {}
@@ -49,9 +49,10 @@ def main():
         obj = change(obj)
         final_obj['content'].append(obj)
     
-    with open(args.out_file, 'w') as f:
-        json.dumps(final_obj)
+    print(len(final_obj['content']))
 
+    with open(args.out_file, 'w') as f:
+        json.dump(final_obj, f)
 
 
 if __name__ == '__main__':

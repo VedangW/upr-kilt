@@ -55,6 +55,8 @@ def read_queries(query_file, trunc=None):
 
 def answer_queries(args):
     cfg = read_config(args.config_path)
+    print(args.query_file)
+
     queries = read_queries(args.query_file, trunc=args.trunc)
     pid2title = read_json(cfg['title_path'])
     searcher = LuceneSearcher(str(cfg['index_dir']))
