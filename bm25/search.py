@@ -17,6 +17,7 @@ def retrieve(queries, num_candidates, searcher, pid2title):
         query_id = query['id']
         question = query['question']
         answers = query['answers']
+        labels = query['labels']
 
         hits = searcher.search(question, k=num_candidates)
 
