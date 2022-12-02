@@ -1,5 +1,8 @@
 import sys
 import json
+import argparse
+import os
+from pathlib import Path
 
 def change(obj):
     new={}
@@ -21,18 +24,26 @@ def change(obj):
             new['labels'].append({"provenance":p_set.get('provenance')})
     return new
 
-
+def validate_file(arg):
+    if (Path(arg)).is_file():
+        return Path(arg)
+    else:
+        return FileNotFoundError(arg)
 
 if __name__ == '__main__':
     final_obj = {}
     final_obj['content'] = []
-    input_file = ""
-    out_file = ""
-    if len(sys.argv) > 1:
-        input_file = str(sys.argv[1])
-        out_file = str(sys.argv[2])
-    file1 = open(input_file, 'r')
-    file2 = open(out_file, 'w')
+    # input_file = ""
+    # out_file = ""
+    # if len(sys.argv) > 1:
+    #     input_file = str(sys.argv[1])
+    #     out_file = str(sys.argv[2])
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--input_file",type=validate_file,required=True)
+    parser.add_argument("--output_file",required=True)
+    args=parser.parse_args()
+    file1 = open(args.input_file, 'r')
+    file2 = open(args.output_file, 'w')
     Lines = file1.readlines()
     file1.close()
     for obj in Lines:
