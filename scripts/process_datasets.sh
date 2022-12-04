@@ -1,6 +1,12 @@
 BASE_DIR="/data/local/vw120/kilt_bm25"
 
-python scripts/ml1_datasetprep.py \
-    --in_file ${BASE_DIR}/datasets/fever-dev-kilt.jsonl \
-    --out_file ${BASE_DIR}/processed_datasets/fever-dev-kilt-processed.json \
-    --verbose
+for dataset in aidayago2 cweb eli5 fever hotpotqa nq triviaqa wned
+do
+    infile="${BASE_DIR}/datasets/${dataset}-dev-kilt.jsonl"
+    outfile="${BASE_DIR}/processed_datasets/${dataset}-dev-kilt-processed.json"
+
+    python scripts/ml1_datasetprep.py \
+        --in_file ${infile} \
+        --out_file ${outfile} \
+        --verbose
+done
