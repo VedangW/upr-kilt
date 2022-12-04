@@ -49,8 +49,6 @@ def main():
         obj = change(obj)
         final_obj['content'].append(obj)
     
-    print(len(final_obj['content']))
-
     with open(args.out_file, 'w') as f:
         json.dump(final_obj, f)
 
