@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 bm25/config.json
+
+data/
