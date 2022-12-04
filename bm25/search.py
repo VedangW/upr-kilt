@@ -6,6 +6,12 @@ from tqdm import tqdm
 from pyserini.search.lucene import LuceneSearcher
 from utils import read_json, write_json, read_config
 
+def has_answer(hit, labels):
+    present = False
+    ### Implement
+    
+    return "true" if present else "false"
+
 def retrieve(queries, num_candidates, searcher, pid2title):
 
     def get_text(hit, title):
@@ -32,12 +38,12 @@ def retrieve(queries, num_candidates, searcher, pid2title):
                 'title': title,
                 'text': get_text(hit, title), 
                 'score': hit.score,
-                'has_answer': "false"
+                'has_answer': has_answer(hit, labels)
             }
         for hit, title in zip(hits, titles)]
 
         results.append({
-            'qid': query_id,
+            'id': query_id,
             'question': question,
             'answers': answers,
             'ctxs': candidates
@@ -46,18 +52,23 @@ def retrieve(queries, num_candidates, searcher, pid2title):
     return results
 
 
-def read_queries(query_file, trunc=None):
+def read_queries(query_file, trunc=None, verbose=False):
     queries = read_json(query_file)
+
+    if type(queries) == dict and 'content' in list(queries.keys()):
+        queries = queries['content']
+
     if trunc:
+        if verbose:
+            print(f"Test run, truncating to {trunc} queries.")
         queries = queries[:trunc]
+
     return queries
 
 
 def answer_queries(args):
     cfg = read_config(args.config_path)
-    print(args.query_file)
-
-    queries = read_queries(args.query_file, trunc=args.trunc)
+    queries = read_queries(args.query_file, trunc=args.trunc, verbose=args.verbose)
     pid2title = read_json(cfg['title_path'])
     searcher = LuceneSearcher(str(cfg['index_dir']))
 
@@ -81,6 +92,8 @@ def main():
                         required=True, help='Path to query file')
     parser.add_argument('--out_file', type=str, required=True, 
                         help='Path of output file.')
+    parser.add_argument('--verbose', action='store_true', 
+                        help='More detailed print statements.')
     args = parser.parse_args()
 
     args.trunc = args.trunc if args.trunc > 0 else None
