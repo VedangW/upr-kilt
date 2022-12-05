@@ -1,5 +1,3 @@
-BASE_DIR="/data/local/vw120/kilt_bm25"
-
 if [ ! -d "${BASE_DIR}/bm25_outputs" ]; then
     echo "Output dir not created. Creating."
     mkdir "${BASE_DIR}/bm25_outputs"
