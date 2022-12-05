@@ -36,6 +36,8 @@ class OpenQADataset(ABC, Dataset):
             self.ques_punc = ""
         elif "nq" in filepath or "efficientqa" in filepath:
             self.ques_punc = "?"
+        else:
+            self.ques_punc = ""
 
     def __len__(self):
         return len(self.samples)

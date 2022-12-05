@@ -25,33 +25,33 @@ def set_random_seed(seed):
     torch.manual_seed(seed)
 
 
-class DiscreteDistribution:
-    def __init__(self, pdf_dict):
-        self.base_counts = pdf_dict
-        self.smooth_denom = sum(self.base_counts.values())
-        self.smoothened_pdf = {k: v/self.smooth_denom for k, v in self.base_counts.items()}        
+# class DiscreteDistribution:
+#     def __init__(self, pdf_dict):
+#         self.base_counts = pdf_dict
+#         self.smooth_denom = sum(self.base_counts.values())
+#         self.smoothened_pdf = {k: v/self.smooth_denom for k, v in self.base_counts.items()}        
         
-    def transform(self, pseudo_count=1, power=1, temperature=1):
-        smoothened_pdf = {k: pow(v + pseudo_count, power)/temperature for k, v in self.base_counts.items()}
-        self.smooth_denom = sum(smoothened_pdf.values())
-        self.smoothened_pdf = {k: v/self.smooth_denom for k, v in smoothened_pdf.items()}
+#     def transform(self, pseudo_count=1, power=1, temperature=1):
+#         smoothened_pdf = {k: pow(v + pseudo_count, power)/temperature for k, v in self.base_counts.items()}
+#         self.smooth_denom = sum(smoothened_pdf.values())
+#         self.smoothened_pdf = {k: v/self.smooth_denom for k, v in smoothened_pdf.items()}
         
-    def p(self, x):
-        return self.smoothened_pdf[x]
+#     def p(self, x):
+#         return self.smoothened_pdf[x]
 
 
-def create_emp_dist(counts_path, total_passages, pseudo_count=1, power=1, temperature=1):
-    """ Load counts from saved retrieval counts file and 
-    create distribution according to power smoothening. """
+# def create_emp_dist(counts_path, total_passages, pseudo_count=1, power=1, temperature=1):
+#     """ Load counts from saved retrieval counts file and 
+#     create distribution according to power smoothening. """
 
-    with open(counts_path, 'rb') as f:
-        sample = pickle.load(f)
+#     with open(counts_path, 'rb') as f:
+#         sample = pickle.load(f)
 
-    all_freqs = {str(k): sample.get(str(k), 0) for k in range(1, total_passages+1)}
-    dist = DiscreteDistribution(all_freqs)
-    dist.transform(pseudo_count=pseudo_count, power=power, temperature=temperature)
+#     all_freqs = {str(k): sample.get(str(k), 0) for k in range(1, total_passages+1)}
+#     dist = DiscreteDistribution(all_freqs)
+#     dist.transform(pseudo_count=pseudo_count, power=power, temperature=temperature)
 
-    return dist
+#     return dist
 
 
 class UnsupervisedPassageReranker():
@@ -90,17 +90,17 @@ class UnsupervisedPassageReranker():
         if self.args.use_gpu:
             self.model = self.model.cuda()
 
-        self.use_priors = use_priors
-        self.total_passages = args.total_passages
-        self.counts_path = args.counts_path
+        self.use_priors = self.args.use_priors
+        self.total_passages = self.args.total_passages
+        self.counts_path = self.args.counts_path
 
-        dist = create_emp_dist(self.counts_path, 
-                               self.total_passages, 
-                               pseudo_count=self.pseudo_count, 
-                               power=self.power, 
-                               temperature=self.temperature)
+        # dist = create_emp_dist(self.counts_path, 
+        #                        self.total_passages, 
+        #                        pseudo_count=self.pseudo_count, 
+        #                        power=self.power, 
+        #                        temperature=self.temperature)
                                
-        self.emp_dist = dist
+        # self.emp_dist = dist
 
         print_rank_0("Loaded {} weights".format(self.args.hf_model_name))
 
@@ -195,17 +195,18 @@ class UnsupervisedPassageReranker():
                 log_softmax = torch.nn.functional.log_softmax(logits, dim=-1)
                 nll = -log_softmax.gather(2, decoder_tensor_view.unsqueeze(2)).squeeze(2)
 
-                prior_probs = torch.tensor([self.emp_dist.p(str(context.get("id"))) for context in shard_contexts])
-                if self.args.use_gpu:
-                    prior_probs = prior_probs.cuda()
+                # prior_probs = torch.tensor([self.emp_dist.p(str(context.get("id"))) for context in shard_contexts])
+                # if self.args.use_gpu:
+                    # prior_probs = prior_probs.cuda()
 
                 avg_nll = torch.sum(nll, dim=1)
-                if self.use_priors:
-                    sharded_nll_list.append(avg_nll*prior_probs)
-                else:
-                    sharded_nll_list.append(avg_nll)
+                # if self.use_priors:
+                #     sharded_nll_list.append(avg_nll*prior_probs)
+                # else:
+                sharded_nll_list.append(avg_nll)
 
             topk_scores, indexes = torch.topk(-torch.cat(sharded_nll_list), k=len(context_tensor))
+            indexes = indexes.cpu()
             ranked_answers = torch.BoolTensor(has_answer_list)[indexes]
 
             # Save the essential information to be used for saving the re-ranked information component.

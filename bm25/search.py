@@ -6,11 +6,6 @@ from tqdm import tqdm
 from pyserini.search.lucene import LuceneSearcher
 from utils import read_json, write_json, read_config
 
-def has_answer(hit, labels):
-    present = False
-    ### Implement
-    
-    return "true" if present else "false"
 
 def retrieve(queries, num_candidates, searcher, pid2title):
 
@@ -28,7 +23,7 @@ def retrieve(queries, num_candidates, searcher, pid2title):
         for label in labels:
             if len(label):
                 for prov_item in label['provenance']:
-                    wiki_ids.add(prov_item['wikipedia_id'])
+                    wiki_ids.add(str(prov_item['wikipedia_id']))
 
         hits = searcher.search(question, k=num_candidates)
 
@@ -43,7 +38,7 @@ def retrieve(queries, num_candidates, searcher, pid2title):
                 'title': title,
                 'text': get_text(hit, title), 
                 'score': hit.score,
-                'has_answer': "true" if json.loads(hit.raw)['wikipedia_id'] in wiki_ids else "false"
+                'has_answer': str(json.loads(hit.raw)['wikipedia_id']) in wiki_ids
             }
         for hit, title in zip(hits, titles)]
 
