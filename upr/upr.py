@@ -195,9 +195,9 @@ class UnsupervisedPassageReranker():
                 log_softmax = torch.nn.functional.log_softmax(logits, dim=-1)
                 nll = -log_softmax.gather(2, decoder_tensor_view.unsqueeze(2)).squeeze(2)
 
-                prior_probs = torch.tensor([self.emp_dist.p(str(context.get("id"))) for context in shard_contexts])
-                if self.args.use_gpu:
-                    prior_probs = prior_probs.cuda()
+                # prior_probs = torch.tensor([self.emp_dist.p(str(context.get("id"))) for context in shard_contexts])
+                # if self.args.use_gpu:
+                    # prior_probs = prior_probs.cuda()
 
                 avg_nll = torch.sum(nll, dim=1)
                 # if self.use_priors:
@@ -206,6 +206,7 @@ class UnsupervisedPassageReranker():
                 sharded_nll_list.append(avg_nll)
 
             topk_scores, indexes = torch.topk(-torch.cat(sharded_nll_list), k=len(context_tensor))
+            indexes = indexes.cpu()
             ranked_answers = torch.BoolTensor(has_answer_list)[indexes]
 
             # Save the essential information to be used for saving the re-ranked information component.
