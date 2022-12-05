@@ -25,33 +25,33 @@ def set_random_seed(seed):
     torch.manual_seed(seed)
 
 
-# class DiscreteDistribution:
-#     def __init__(self, pdf_dict):
-#         self.base_counts = pdf_dict
-#         self.smooth_denom = sum(self.base_counts.values())
-#         self.smoothened_pdf = {k: v/self.smooth_denom for k, v in self.base_counts.items()}        
+class DiscreteDistribution:
+    def __init__(self, pdf_dict):
+        self.base_counts = pdf_dict
+        self.smooth_denom = sum(self.base_counts.values())
+        self.smoothened_pdf = {k: v/self.smooth_denom for k, v in self.base_counts.items()}        
         
-#     def transform(self, pseudo_count=1, power=1, temperature=1):
-#         smoothened_pdf = {k: pow(v + pseudo_count, power)/temperature for k, v in self.base_counts.items()}
-#         self.smooth_denom = sum(smoothened_pdf.values())
-#         self.smoothened_pdf = {k: v/self.smooth_denom for k, v in smoothened_pdf.items()}
+    def transform(self, pseudo_count=1, power=1, temperature=1):
+        smoothened_pdf = {k: pow(v + pseudo_count, power)/temperature for k, v in self.base_counts.items()}
+        self.smooth_denom = sum(smoothened_pdf.values())
+        self.smoothened_pdf = {k: v/self.smooth_denom for k, v in smoothened_pdf.items()}
         
-#     def p(self, x):
-#         return self.smoothened_pdf[x]
+    def p(self, x):
+        return self.smoothened_pdf[x]
 
 
-# def create_emp_dist(counts_path, total_passages, pseudo_count=1, power=1, temperature=1):
-#     """ Load counts from saved retrieval counts file and 
-#     create distribution according to power smoothening. """
+def create_emp_dist(counts_path, total_passages, pseudo_count=1, power=1, temperature=1):
+    """ Load counts from saved retrieval counts file and 
+    create distribution according to power smoothening. """
 
-#     with open(counts_path, 'rb') as f:
-#         sample = pickle.load(f)
+    with open(counts_path, 'rb') as f:
+        sample = pickle.load(f)
 
-#     all_freqs = {str(k): sample.get(str(k), 0) for k in range(1, total_passages+1)}
-#     dist = DiscreteDistribution(all_freqs)
-#     dist.transform(pseudo_count=pseudo_count, power=power, temperature=temperature)
+    all_freqs = {str(k): sample.get(str(k), 0) for k in range(1, total_passages+1)}
+    dist = DiscreteDistribution(all_freqs)
+    dist.transform(pseudo_count=pseudo_count, power=power, temperature=temperature)
 
-#     return dist
+    return dist
 
 
 class UnsupervisedPassageReranker():
