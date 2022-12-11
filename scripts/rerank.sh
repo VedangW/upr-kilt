@@ -3,7 +3,7 @@
 export TRANSFORMERS_CACHE="${DATA_DIR}/transformer_cache"
 
 BASE_DIR="${DATA_DIR}/kilt_bm25"
-DATASET="fever"
+DATASET="aidayago2"
 SPLIT="dev"
 
 MODEL="t5-v1_1-base" # Options: ("t5-v1_1-{m}"; m = "base", "small", "large", "xl"), "t5-xl-lm-adapt"
@@ -28,13 +28,14 @@ echo "Evidence data at: ${EVIDENCE_DATA_PATH}"
 WORLD_SIZE=2
 DISTRIBUTED_ARGS="-m torch.distributed.launch --nproc_per_node ${WORLD_SIZE} --nnodes 1 --node_rank 0 --master_addr localhost --master_port 6000"
 
-VERBALIZER='"Please write a claim based on this passage."'
+VERBALIZER='"Fill in the blanks."'
 
 ARGS=" \
   --num-workers 2 \
   --log-interval 1 \
   --topk-passages ${TOPK} \
   --shard-size 32 \
+  --task-name entity_linking \
   --hf-model-name ${HF_MODEL} \
   --use-gpu \
   --use-bf16 \
