@@ -102,7 +102,7 @@ class OpenQADataset(ABC, Dataset):
         else:
             self.ques_punc = ""
 
-    def process_str(ctxt, start='[START_ENT]', end='[END_ENT]'):
+    def extract_mention(self, ctxt, start='[START_ENT]', end='[END_ENT]'):
         """ Used for Entity Linking. """
 
         ctxt_left, right = ctxt.split(start)
