@@ -208,6 +208,6 @@ class CustomDataLoader(DataLoader):
         for d in batch_data:
             for k, v in d.items():
                 tensorized.setdefault(k, []).append(v)
-        assert len(tensorized) == 5
+        # assert len(tensorized) == 5
 
         return tensorized

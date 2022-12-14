@@ -1,10 +1,13 @@
 from abc import ABC
+import os
 import json
 import random
 import pathlib
 import argparse
+import numpy as np
 from torch.utils.data import Dataset
 from utils import print_rank_0
+from utils.initialize import initialize_distributed
 from IPython import embed
 from transformers import T5Tokenizer, T5Config, T5ForConditionalGeneration
 import torch
@@ -14,8 +17,21 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--dataset', type=pathlib.Path, 
                     required=True, help='Path to dataset.')
+parser.add_argument('--sort-by-score', action='store_true')
+parser.add_argument('--local_rank', type=int, default=-1,
+                    help='local rank passed from distributed launcher.')
+parser.add_argument('--main-port', type=int, default=29500,
+                    help='Main port number.')
+parser.add_argument('--report-topk-accuracies', nargs='+', type=int, default=[1, 5, 10, 20, 50, 100, 1000],
+                    help="Which top-k accuracies to report (e.g. '1 5 20')")
 
 args = parser.parse_args()
+
+args.rank = int(os.getenv('RANK', '0'))
+args.world_size = int(os.getenv("WORLD_SIZE", '1'))
+args.local_rank = int(os.environ['LOCAL_RANK'])
+
+initialize_distributed(args)
 
 if not args.dataset.exists():
     raise ValueError("Provided path doesn't exist.")
@@ -102,18 +118,22 @@ class OpenQADataset(ABC, Dataset):
         else:
             return data
 
-dataset = OpenQADataset("entity_linking",
+dataset = OpenQADataset("reranking",
                         "open-domain retrieval",
                         str(args.dataset),
                         1.)
 
 print(f"Question: {dataset[2332]['question']}")
 
-text = dataset[2332]['question']
+gold_passage = "Robert Damien Bale Croft MBE (born 25 May 1970) is a former Welsh cricketer who played international cricket for England. He is an off-spin bowler who played for Glamorgan and captained the county from 2003 to 2006. He retired from first class cricket at the end of the 2012 season, having played county cricket for 23 seasons. He commentates on cricket occasionally for Sky Sports."
+
+q = dataset[2332]['question']
 context_left, mention = text.split('[START_ENT]')
 mention, context_right = mention.split('[END_ENT]')
 
 text = context_left + ' <extra_id_0> ' + context_right
+
+# text = f"Passage: {q}. Please write a claim based on this passage."
 
 print(text)
 
@@ -155,4 +175,50 @@ def _filter(output, end_token='<extra_id_1>'):
 results = list(map(_filter, outputs))
 results
 
-embed()
+def calculate_topk_hits(scores, max_k):
+        top_k_hits = [0] * max_k
+        for question_hits in scores:
+            best_hit = next((i for i, x in enumerate(question_hits[:max_k]) if x), None)
+            if best_hit is not None:
+                top_k_hits[best_hit:] = [v + 1 for v in top_k_hits[best_hit:]]
+        return top_k_hits
+
+def compute_topk_recall(answers_list, string_prefix='BM25'):
+    topk_hits = calculate_topk_hits(answers_list, max_k=args.report_topk_accuracies[-1])
+
+    topk_hits = torch.FloatTensor(topk_hits).cuda()
+    n_docs = torch.FloatTensor([len(answers_list)]).cuda()
+    torch.distributed.all_reduce(topk_hits, torch.distributed.ReduceOp.SUM)
+    torch.distributed.all_reduce(n_docs, torch.distributed.ReduceOp.SUM)
+
+    if torch.distributed.get_rank() == 0:
+        topk_hits = topk_hits / n_docs
+        print(string_prefix)
+        for i in args.report_topk_accuracies:
+            print_rank_0("top-{}: {:.2f}".format(i, topk_hits[i - 1] * 100))
+        print("\n")
+
+answers_list = []
+for i in range(len(dataset)):
+    answers_list.append([
+        x['has_answer'] for x in dataset[i]['encoder_ids']
+    ])
+
+compute_topk_recall(answers_list)
+# def topk_accuracy(ctxs, args):
+#     if args.sort_by_score:
+#         ctxs = sorted(ctxs, key=lambda d: d['score'], reverse=True)
+
+#     relevant20 = [x for x in ctxs[:20] if x['has_answer']]
+#     relevant100 = [x for x in ctxs[:100] if x ['has_answer']]
+#     return len(relevant20)/20, len(relevant100)/100
+
+# accs20, accs100 = [], []
+
+# for i in range(len(dataset)):
+#     a20, a100 = topk_accuracy(dataset[i]['encoder_ids'], args)
+#     accs20.append(a20)
+#     accs100.append(a100)
+
+# print(f"Acc@20 = {round(np.mean(accs20)*100, 5)}")
+# print(f"Acc@100 = {round(np.mean(accs100)*100, 5)}")

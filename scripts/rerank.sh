@@ -3,7 +3,7 @@
 export TRANSFORMERS_CACHE="${DATA_DIR}/transformer_cache"
 
 BASE_DIR="${DATA_DIR}/kilt_bm25"
-DATASET="aidayago2"
+DATASET="wned"
 SPLIT="dev"
 
 MODEL="t5-v1_1-base" # Options: ("t5-v1_1-{m}"; m = "base", "small", "large", "xl"), "t5-xl-lm-adapt"
@@ -39,6 +39,7 @@ ARGS=" \
   --hf-model-name ${HF_MODEL} \
   --use-gpu \
   --use-bf16 \
+  --sample-rate 0.05 \
   --report-topk-accuracies 1 5 20 100 \
   --evidence-data-path ${EVIDENCE_DATA_PATH} \
   --retriever-topk-passages-path ${BASE_DIR}/bm25_outputs/${DATASET}-${SPLIT}.json \
@@ -51,6 +52,6 @@ ARGS=" \
 # However, when working with V100 GPUs, this argument should be removed.
 
 
-COMMAND="WORLD_SIZE=${WORLD_SIZE} python ${DISTRIBUTED_ARGS} upr/upr.py ${ARGS}"
+COMMAND="WORLD_SIZE=${WORLD_SIZE} python ${DISTRIBUTED_ARGS} upr/upr_el.py ${ARGS}"
 eval "${COMMAND}"
 exit
