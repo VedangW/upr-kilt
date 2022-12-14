@@ -17,6 +17,69 @@ def get_openqa_dataset(task_name, dataset_path, sample_rate=1.0):
 
 
 
+# class OpenQADataset(ABC, Dataset):
+#     def __init__(self, task_name, dataset_name, filepath, sample_rate):
+#         self.task_name = task_name
+#         self.dataset_name = dataset_name
+#         print_rank_0(' > building {} dataset for {}:'.format(self.task_name,
+#                                                              self.dataset_name))
+#         self.samples = self.load_dataset(filepath)
+
+#         if sample_rate < 1:  # subsample
+#             k = int(len(self.samples) * sample_rate)
+#             self.samples = random.sample(self.samples, k)
+
+#         print_rank_0('  >> total number of samples: {}'.format(len(self.samples)))
+
+#         if "trivia" in filepath or 'webq' in filepath or 'entity-questions' in filepath \
+#                 or "BEIR" in filepath or "squad" in filepath:
+#             self.ques_punc = ""
+#         elif "nq" in filepath or "efficientqa" in filepath:
+#             self.ques_punc = "?"
+#         else:
+#             self.ques_punc = ""
+
+#     def __len__(self):
+#         return len(self.samples)
+
+#     def __getitem__(self, idx):
+#         row = self.samples[idx]
+
+#         # These [CLS] and [SEP] tokens exist due to BERT tokenization, so we need to remove them
+#         if "[CLS]" and "[SEP]" in row['question']:
+#             row['question'] = " ".join(row['question'].split()[1:-1])
+
+#         if self.task_name == "reranking":
+#             decoder_prompt = "Question: {}{}".format(row['question'], self.ques_punc)
+#         else:
+#             raise AssertionError("invalid --task-name argument {}".format(self.task_name))
+
+#         encoder_contexts = None
+#         if 'ctxs' in row:
+#             encoder_contexts = row['ctxs']
+#         elif 'contexts' in row:
+#             encoder_contexts = row['contexts']
+
+#         answers = row['answers']
+
+#         sample = {'id': idx,
+#                   'encoder_ids': encoder_contexts,
+#                   'decoder_ids': decoder_prompt,
+#                   'question': row['question'],
+#                   'answers': answers}
+#         return sample
+
+#     @staticmethod
+#     def load_dataset(filepath):
+#         with open(filepath) as fp:
+#             data = json.load(fp)
+
+#         # condition for interfacing with pyserineni BM25 outputs
+#         if isinstance(data, dict):
+#             return list(data.values())
+#         else:
+#             return data
+
 class OpenQADataset(ABC, Dataset):
     def __init__(self, task_name, dataset_name, filepath, sample_rate):
         self.task_name = task_name
@@ -39,6 +102,17 @@ class OpenQADataset(ABC, Dataset):
         else:
             self.ques_punc = ""
 
+    def extract_mention(self, ctxt, start='[START_ENT]', end='[END_ENT]'):
+        """ Used for Entity Linking. """
+
+        ctxt_left, right = ctxt.split(start)
+        mention, ctxt_right = right.split(end)
+        
+        ctxt_left, mention, ctxt_right = \
+            ctxt_left.strip(), mention.strip(), ctxt_right.strip()
+        
+        return ctxt_left + ' <extra_id_0> ' + ctxt_right, mention
+
     def __len__(self):
         return len(self.samples)
 
@@ -51,6 +125,12 @@ class OpenQADataset(ABC, Dataset):
 
         if self.task_name == "reranking":
             decoder_prompt = "Question: {}{}".format(row['question'], self.ques_punc)
+            masked_question = ""
+        elif self.task_name == "fact_checking":
+            decoder_prompt = "Claim: {}{}".format(row['question'], self.ques_punc)
+            masked_question = ""
+        elif self.task_name == "entity_linking":
+            masked_question, decoder_prompt = self.extract_mention(row['question'])
         else:
             raise AssertionError("invalid --task-name argument {}".format(self.task_name))
 
@@ -66,6 +146,7 @@ class OpenQADataset(ABC, Dataset):
                   'encoder_ids': encoder_contexts,
                   'decoder_ids': decoder_prompt,
                   'question': row['question'],
+                  'masked_question': masked_question,
                   'answers': answers}
         return sample
 
@@ -127,6 +208,6 @@ class CustomDataLoader(DataLoader):
         for d in batch_data:
             for k, v in d.items():
                 tensorized.setdefault(k, []).append(v)
-        assert len(tensorized) == 5
+        # assert len(tensorized) == 5
 
         return tensorized
