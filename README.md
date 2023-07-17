@@ -1,5 +1,5 @@
 # upr-kilt
-UPR for retrieval on KILT
+Unsupervised Passage Retrieval for Question Answering, Fact Checking, and Entity Linking on the KILT benchmark using the T5 language model series.
 
 ## Setup
 
