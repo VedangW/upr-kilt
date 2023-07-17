@@ -1,6 +1,15 @@
 # upr-kilt
 Unsupervised Passage Retrieval for Question Answering, Fact Checking, and Entity Linking on the KILT benchmark using the T5 language model series.
 
+## Introduction
+
+Several tasks in NLP can be best solved with a large knowledge base at hand. Some examples of these are Question Answering, Fact Checking, and Entity Linking. For instance, if you want to answer factual questions using a language model such as `"Who was the president of the United States in 2019?"`, it'll require the LM to either memorize a huge number of facts or learn to fetch the right information to answer it. The former approach has several disadvantages such as massive amounts of pre-training, memory requirements, and will need re-training when the facts become stale. The latter approach includes efficient text retrieval and re-ranking, along with combining the retrieved information using a reader model. This is obviously quite attractive. The [KILT benchmark](https://ai.meta.com/tools/kilt/) is a great resource recently introduced by Meta AI for evaluating models on knowledge-intensive tasks.
+
+In this project, we try to tackle the problem of creating an unsupervised retrieval-reranking-reading pipeline. We start with the [UPR model](https://github.com/DevSinghSachan/unsupervised-passage-reranking), which uses BM25 for fast retrieval and various LMs for re-ranking and has already been applied to various Question Answering datasets. We contribute in the following ways:
+
+- Evaluate the UPR model on additional QA tasks from the KILT benchmark.
+- Extend the UPR formulation to other tasks such as Fact-Checking and Entity Linking.
+
 ## Setup
 
 Choose a base directory, `BASE_DIR`, which will be large enough to hold upto 60 GB of data.
